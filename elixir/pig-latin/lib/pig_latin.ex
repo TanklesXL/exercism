@@ -44,12 +44,9 @@ defmodule PigLatin do
     end
   end
 
-  defp get_leading_consonants([]), do: []
+  defguardp is_consonant(letter) when letter not in @vowels
 
-  defp get_leading_consonants([h | t]) do
-    cond do
-      h not in @vowels -> [h | get_leading_consonants(t)]
-      true -> []
-    end
-  end
+  defp get_leading_consonants([]), do: []
+  defp get_leading_consonants([h | t]) when is_consonant(h), do: [h | get_leading_consonants(t)]
+  defp get_leading_consonants(_), do: []
 end

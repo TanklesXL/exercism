@@ -12,12 +12,8 @@ defmodule RnaTranscription do
     dna |> Enum.map(&complement/1)
   end
 
-  defp complement(nucleo) do
-    case nucleo do
-      ?A -> ?U
-      ?C -> ?G
-      ?G -> ?C
-      ?T -> ?A
-    end
-  end
+  defp complement(?A), do: ?U
+  defp complement(?C), do: ?G
+  defp complement(?G), do: ?C
+  defp complement(?T), do: ?A
 end
