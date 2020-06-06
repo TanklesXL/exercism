@@ -1,3 +1,3 @@
 # Exercism
 
-My solutions to some of the problems found at [exercism.io](exercism.io)
+My solutions to some of the problems found at [exercism.io](https://exercism.io)
