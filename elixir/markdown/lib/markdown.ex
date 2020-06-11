@@ -17,8 +17,8 @@ defmodule Markdown do
   def parse(m) do
     m
     |> String.split("\n")
-    |> Enum.map(&process_line/1)
-    |> Enum.join()
+    |> Task.async_stream(&process_line/1)
+    |> Enum.reduce("", fn {:ok, line}, acc -> acc <> line end)
     |> patch_lists()
   end
 
@@ -28,31 +28,18 @@ defmodule Markdown do
 
   defp build_header(header) do
     [h, t] = String.split(header, " ", parts: 2)
-
-    hl =
-      h
-      |> String.length()
-      |> to_string()
-
-    suround_with_tag(t, "h" <> hl)
+    suround_with_tag(t, "h#{String.length(h)}")
   end
 
   defp format_and_enclose_with_tag(s, tag) do
     s
     |> String.split(" ")
-    |> join_words_with_tags()
+    |> Stream.map(&replace_md_with_tag/1)
+    |> Enum.join(" ")
     |> suround_with_tag(tag)
   end
 
-  defp suround_with_tag(s, tag) do
-    "<" <> tag <> ">" <> s <> "</" <> tag <> ">"
-  end
-
-  defp join_words_with_tags(t) do
-    t
-    |> Enum.map(fn w -> replace_md_with_tag(w) end)
-    |> Enum.join(" ")
-  end
+  defp suround_with_tag(s, tag), do: "<#{tag}>#{s}</#{tag}>"
 
   defp replace_md_with_tag(w) do
     w
@@ -64,22 +51,22 @@ defmodule Markdown do
   defp format_prefix("_" <> rest), do: "<em>" <> format_prefix(rest)
   defp format_prefix(word), do: word
 
-  defp format_suffix(word, reversed \\ false)
-
-  defp format_suffix(word, false) do
+  defp format_suffix(word) do
     word
     |> String.reverse()
-    |> format_suffix(true)
+    |> format_reversed_suffix()
     |> String.reverse()
   end
 
-  defp format_suffix(word, true) do
-    case word do
-      "__" <> rest -> String.reverse("</strong>") <> format_suffix(rest, true)
-      "_" <> rest -> String.reverse("</em>") <> format_suffix(rest, true)
-      _ -> word
-    end
+  defp format_reversed_suffix("__" <> rest) do
+    String.reverse("</strong>") <> format_reversed_suffix(rest)
   end
+
+  defp format_reversed_suffix("_" <> rest) do
+    String.reverse("</em>") <> format_reversed_suffix(rest)
+  end
+
+  defp format_reversed_suffix(word), do: word
 
   defp patch_lists(l) do
     l
