@@ -12,20 +12,11 @@ const MINS_PER_DAY: i32 = HOURS_PER_DAY * MINS_PER_HOUR;
 
 impl Clock {
     pub fn new(hours: i32, minutes: i32) -> Self {
-        let mins_max_one_day = Self::bounded_total_minutes(hours, minutes);
+        let mins_max_one_day = ((hours * MINS_PER_HOUR) + minutes).rem_euclid(MINS_PER_DAY);
 
         Clock {
-            hrs: (mins_max_one_day % MINS_PER_DAY) / MINS_PER_HOUR,
-            mins: (mins_max_one_day % MINS_PER_DAY) % MINS_PER_HOUR,
-        }
-    }
-
-    fn bounded_total_minutes(hours: i32, minutes: i32) -> i32 {
-        let mins_max_one_day = ((hours * MINS_PER_HOUR) + minutes) % MINS_PER_DAY;
-        if mins_max_one_day < 0 {
-            MINS_PER_DAY + mins_max_one_day
-        } else {
-            mins_max_one_day
+            hrs: mins_max_one_day / MINS_PER_HOUR,
+            mins: mins_max_one_day % MINS_PER_HOUR,
         }
     }
 
