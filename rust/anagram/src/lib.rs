@@ -14,12 +14,7 @@ pub fn anagrams_for<'a>(word: &str, possible_anagrams: &[&'a str]) -> HashSet<&'
 fn count_letters(word: &str) -> HashMap<String, u8> {
     let mut counts: HashMap<String, u8> = HashMap::new();
     for letter in word.graphemes(true).into_iter() {
-        let letter = letter.to_lowercase();
-        match counts.get(&letter) {
-            Some(&num) => counts.insert(letter, num + 1),
-            None => counts.insert(letter, 1),
-        };
+        *counts.entry(letter.to_lowercase()).or_default() += 1;
     }
-
     counts
 }
